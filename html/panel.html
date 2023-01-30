@@ -1,0 +1,145 @@
+<html>
+
+<head>
+    <link href="../css/panel.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Mulish:wght@400;500;600;700&family=Noto+Sans:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="main">
+        <div class="header">
+            <h1 class="title">Marketplace Helper</h1>
+            <p id="current-query" class="text-tiny"></p>
+            <div class="controls">
+                <div class="availability-btns">
+                    <button id="start">Start</button>
+                    <button class="active" id="pause">Pause</button>
+                </div>
+            </div>
+            <div class="filters">
+                <h2>Filters</h2>
+                <select id="sort" name="sort">
+                    <option value="time">time</option>
+                    <option value="distance">distance</option>
+                    <option value="price">price</option>
+                </select>
+                <div class="filter-container">
+                    <label for="hideDistance">Hide items further than</label>
+                    <input type="number" id="hideDistanceVal" value="50" class="text-input"></input>
+                    <span>mi</span>
+                    <input type="checkbox" id="hideDistance" name="hideDistance" class="filter-checkbox">
+                </div>
+                <div class="filter-container">
+                    <label for="hideTimeOver">Hide items created over</label>
+                    <input type="number" id="hideTimeOverVal" value="1" class="text-input"></input>
+                    <span>days ago</span>
+                    <input type="checkbox" id="hideTimeOver" name="hideTimeOver" class="filter-checkbox">
+                </div>
+                <div class="filter-container">
+                    <label for="hidePriceOver">Hide items greater than</label>
+                    <span>$</span>
+                    <input type="number" id="hidePriceOverVal" value="1000" class="text-input"></input>
+                    <input type="checkbox" id="hidePriceOver" name="hidePriceOver" class="filter-checkbox">
+                </div>
+                <div class="filter-container">
+                    <label for="hidePriceUnder">Hide items less than</label>
+                    <span>$</span>
+                    <input type="number" id="hidePriceUnderVal" value="2" class="text-input"></input>
+                    <input type="checkbox" id="hidePriceUnder" name="hidePriceUnder" class="filter-checkbox">
+                </div>
+                <div class="filter-container">
+                    <label for="showNegotiable">Only show items that are negotiable</label>
+                    <input type="checkbox" id="showNegotiable" name="showNegotiable" class="filter-checkbox">
+                </div>
+                <div class="filter-container">
+                    <label for="explicitWords">Only show items that have these words in the title or description</label>
+                    <input type="text" id="explicitWordsVal" class="text-input input-long"></input>
+                    <input type="checkbox" id="explicitWords" name="explicitWords" class="filter-checkbox">
+                </div>
+                <div class="filter-container">
+                    <label for="explicitWordsHide">Hide items that have these words in the title or description</label>
+                    <input type="text" id="explicitWordsHideVal" class="text-input input-long"></input>
+                    <input type="checkbox" id="explicitWordsHide" name="explicitWordsHide" class="filter-checkbox">
+                </div>
+            </div>
+            <div class="graph">
+                <h2>Price data</h2>
+                <p id="avg-price" class="text-tiny"></p>
+                <div class="graph-section" data-incr="0">
+                    <div class="price"></div>
+                    <div class="bar"></div>
+                </div>
+                <div class="graph-section" data-incr="1">
+                    <div class="price"></div>
+                    <div class="bar"></div>
+                </div>
+                <div class="graph-section" data-incr="2">
+                    <div class="price"></div>
+                    <div class="bar"></div>
+                </div>
+                <div class="graph-section" data-incr="3">
+                    <div class="price"></div>
+                    <div class="bar"></div>
+                </div>
+                <div class="graph-section" data-incr="4">
+                    <div class="price"></div>
+                    <div class="bar"></div>
+                </div>
+                <div class="graph-section" data-incr="5">
+                    <div class="price"></div>
+                    <div class="bar"></div>
+                </div>
+                <div class="graph-section" data-incr="6">
+                    <div class="price"></div>
+                    <div class="bar"></div>
+                </div>
+                <div class="graph-section" data-incr="7">
+                    <div class="price"></div>
+                    <div class="bar"></div>
+                </div>
+                <div class="graph-section" data-incr="8">
+                    <div class="price"></div>
+                    <div class="bar"></div>
+                </div>
+                <div class="graph-section" data-incr="9">
+                    <div class="price"></div>
+                    <div class="bar"></div>
+                </div>
+                <div class="graph-section" data-incr="10">
+                    <div class="price"></div>
+                    <div class="bar"></div>
+                </div>
+                <div class="graph-section" data-incr="11">
+                    <div class="price"></div>
+                    <div class="bar"></div>
+                </div>
+                <div class="graph-section" data-incr="12">
+                    <div class="price"></div>
+                    <div class="bar"></div>
+                </div>
+            </div>
+            <h2>Searches</h2>
+            <div class="searches"></div>
+        </div>
+        <div class="items-container">
+            <div class="items-header">
+                <h2 class="items-count">0 Items</h2>
+                <div class="availability-btns">
+                    <button id="items-available">Available</button>
+                    <button id="items-sold">Sold</button>
+                    <button id="items-all">All</button>
+                    <button id="items-hidden">Hidden</button>
+                </div>
+            </div>
+            <p id="no-items">No data for this yet.</p>
+            <div class="items"></div>
+        </div>
+    </div>
+    <script src="../js/panel.js"></script>
+</body>
+
+</html>

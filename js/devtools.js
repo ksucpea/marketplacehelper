@@ -1,0 +1,1 @@
+chrome.devtools.panels.create("**** BETTER FBM ****", null, 'html/panel.html');
