@@ -1,5 +1,6 @@
-<h1>UMD Calorie tracker</h1>
-Calorie tracking using the nutrition.umd.edu menu, tracks calories, fat, cholesterol, sopdium, carbs, sugar, protein, calcium, potassium, vitamin c, and iron
+<h1>Marketplace Helper</h1>
+Advanced filtering, price data analysis, and additional info for Facebook Marketplace
+
 <h2>Manual Installation</h2>
 
 - Download this repo
