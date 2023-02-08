@@ -1,5 +1,6 @@
 <h1>Marketplace Helper</h1>
 Advanced filtering, price data analysis, and additional info for Facebook Marketplace
+Note: this is a WIP and has several things that need to be fixed
 
 <h2>Manual Installation</h2>
 
