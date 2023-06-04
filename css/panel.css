@@ -3,6 +3,10 @@
     font-family: 'Mulish', sans-serif;
     font-family: 'Roboto', sans-serif;
     font-family: 'Noto Sans', sans-serif;
+    font-family: 'Work Sans';
+    font-family: 'Barlow', sans-serif;
+    font-family: 'DM Sans', sans-serif;
+    font-family: 'Inter', sans-serif;
 }
 
 
@@ -26,7 +30,6 @@ body {
     transform: translateY(-0.075em);
     display: grid;
     place-content: center;
-    margin-left: auto;
 }
 
 .filter-checkbox:checked {
@@ -41,6 +44,11 @@ body {
 
 .title {
     margin: 18px 0 4px 0;
+    background: -webkit-linear-gradient(315deg, #0062e0, #35b8fe);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 32px;
+    font-weight: 700;
 }
 
 .text-input {
@@ -96,7 +104,7 @@ img {
 
 .items {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 12px;
     padding: 16px;
 }
@@ -138,7 +146,7 @@ img {
     height: 100%;
     width: 100%;
     background: #1414148c;
-    padding: 8px;
+    padding: 15px;
     box-sizing: border-box;
     color: #fff;
     display: flex;
@@ -149,8 +157,10 @@ img {
 
 .item-price {
     font-weight: bold;
-    font-size: 18px;
+    font-size: 20px;
 }
+
+.settings input.text-input {width: 120px}
 
 button {
     display: block;
@@ -184,7 +194,7 @@ button.active:hover {
 }
 
 .price {
-    width: 50px;
+    min-width: 50px;
 }
 
 .bar {
@@ -209,8 +219,11 @@ button.active:hover {
 }
 
 .controls,
-.filters {
+.filters,
+.title,
+.settings {
     border-bottom: 1px solid #ced0d4;
+    padding-bottom: 10px;
 }
 
 .items-header {
@@ -230,11 +243,11 @@ button.active:hover {
 .header {
     background: #fff;
     box-shadow: 1px -7px 3px 0px #dfdfdf;
-    padding: 0 10px;
+    padding: 0 15px;
     position: relative;
     z-index: 1;
-    min-width: 340px;
-    max-width: 340px;
+    min-width: 425px;
+    max-width: 425px;
 }
 
 .availability-btns {
@@ -258,8 +271,11 @@ button.active:hover {
     justify-content: center;
 }
 
+.hide-item {padding: 10px; margin: -10px; stroke: #fff;height: 20px; width: 20px; opacity: 0%;z-index: -1}
+
 .item-arrow-left:hover,
-.item-arrow-right:hover {
+.item-arrow-right:hover,
+.hide-item:hover {
     cursor: pointer;
 }
 
@@ -268,7 +284,8 @@ button.active:hover {
 }
 
 .item-container.hovered .item-arrow-left,
-.item-container.hovered .item-arrow-right {
+.item-container.hovered .item-arrow-right,
+.item-container.hovered .hide-item {
     z-index: 10;
     opacity: 100%;
 }

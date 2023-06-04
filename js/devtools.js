@@ -1,1 +1,1 @@
-chrome.devtools.panels.create("**** BETTER FBM ****", null, 'html/panel.html');
+chrome.devtools.panels.create("Marketplace Helper", null, 'html/panel.html');
