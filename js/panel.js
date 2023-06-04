@@ -585,7 +585,7 @@ function refresh() {
 
 let refreshInterval;
 
-const loadSettings = () => {
+const loadSettings = (callback = () => {}) => {
     chrome.tabs.query({ url: ["https://www.facebook.com/marketplace/*/search*", "https://www.facebook.com/marketplace/category/*"] }, function (tabs) {
         chrome.storage.local.get(["settings", "saved"], storage => {
             document.querySelector("#long").value = storage.settings.long;
@@ -598,6 +598,7 @@ const loadSettings = () => {
             if (!storage.saved || storage.saved.length === 0) {
 
             } else {
+                document.querySelector("#save-under").textContent = "";
                 storage.saved.forEach(item => {
                     document.querySelector("#save-under").innerHTML += '<option value="' + item.name + '">' + item.name + '</option>';
                     if (set === false) {
@@ -610,6 +611,7 @@ const loadSettings = () => {
                     }
                 });
             }
+            callback();
         });
     });
 }
@@ -738,12 +740,19 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     document.querySelector("#create-save").addEventListener("click", function (e) {
-        if (document.querySelector("#create-save-name").value === "") return;
+        const save = document.querySelector("#create-save-name").value;
+        if (save === "") return;
         chrome.storage.local.get("saved", storage => {
             //chrome.tabs.query({ url: ["https://www.facebook.com/marketplace/*/search*", "https://www.facebook.com/marketplace/category/*"] }, function (tabs) {
             let existing = storage["saved"] ? storage["saved"] : [];
-            existing.push({ "name": document.querySelector("#create-save-name").value, "pathnames": [] });
-            chrome.storage.local.set({ "saved": existing });
+            existing.push({ "name": save, "pathnames": [] });
+            chrome.storage.local.set({ "saved": existing }).then(() => {
+                loadSettings(() => {
+                    document.querySelector("#save-under").value = save;
+                    document.querySelector("#save-under").querySelector("option[value=" + save + "]").selected = true;
+                    display();
+                });
+            });
             //})
         });
     });
