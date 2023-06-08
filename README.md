@@ -19,7 +19,7 @@ Note: this is a WIP and has several things that need to be fixed
 
 
 <p>Use filters or sort listings without having to refresh listings, and view price data for filtered items</p>
-<img src="https://github.com/ksucpea/marketplacehelper/blob/main/images/1.png" />
+<img src="https://github.com/ksucpea/marketplacehelper/blob/main/images/img6.png" />
 <img src="https://github.com/ksucpea/marketplacehelper/blob/main/images/img5.png" />
 
 <p>Hover over items and press the arrow buttons to view more listing images</p>
