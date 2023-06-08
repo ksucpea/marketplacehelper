@@ -15,7 +15,7 @@ Note: this is a WIP and has several things that need to be fixed
 
 <p>Open devtools window in Facebook Marketplace (right click -> inspect element -> Marketplace Helper tab)</p>
 <p>Collect listing data by going to a category or searching for an item and pressing the start button</p>
-<img src="https://github.com/ksucpea/marketplacehelper/blob/main/images/3.png" height="560px" />
+<img src="https://github.com/ksucpea/marketplacehelper/blob/main/images/img3.png" height="560px" />
 
 
 <p>Use filters or sort listings without having to refresh listings, and view price data for filtered items</p>
