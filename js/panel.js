@@ -4,7 +4,8 @@ const batchCount = 10;
 const num_graph_sections = 13; // +1 (starts at 0)
 
 const arrowSvg = '<svg class="item-arrow" viewBox="0 0 20 20" width="1em" height="1em"><path d="M10 14a1 1 0 0 1-.755-.349L5.329 9.182a1.367 1.367 0 0 1-.205-1.46A1.184 1.184 0 0 1 6.2 7h7.6a1.18 1.18 0 0 1 1.074.721 1.357 1.357 0 0 1-.2 1.457l-3.918 4.473A1 1 0 0 1 10 14z"></path></svg>';
-const hideSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+const hideSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+const chevronDown = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
 
 function selectItemAvailability() {
     chrome.tabs.query({ active: true }, function (tabs) {
@@ -27,7 +28,6 @@ function selectItemAvailability() {
 function checkBatch() {
     chrome.tabs.query({ url: ["https://www.facebook.com/marketplace/*/search*", "https://www.facebook.com/marketplace/category/*"] }, function (tabs) {
         const path = tabs[0].url;
-        const save = document.querySelector("#save-under").value;
         chrome.storage.local.get([path], storage => {
             selectItemAvailability();
             const availability = tabs[0].url.includes("availability=out%20of%20stock") ? "sold" : "available";
@@ -38,10 +38,10 @@ function checkBatch() {
 
             let existing = storage[path] ? storage[path] : {};
             let updatedData = { ...existing, ...batch };
-
+            console.log({ ...batch });
             batch = {};
 
-            chrome.storage.local.set({ [path]: updatedData, "saved": storage["saved"] }).then(() => {
+            chrome.storage.local.set({ [path]: updatedData }).then(() => {
                 document.querySelector(".batch-count").textContent = "dumped";
 
                 chrome.storage.local.get(null, res => {
@@ -110,28 +110,29 @@ function createListing(item) {
                             </div>
                         </div>
                         <div>
-                            <a href="https://facebook.com/marketplace/item/${item.id}" style="padding: 10px; margin: -10px;display: block; color: #fff;text-decoration:none">
+                            <div class="item-link" style="padding: 10px; margin: -10px;display: block; color: #fff;text-decoration:none">
                                 <p style="margin: 0;font-size:14px;font-weight:700">${item.marketplace_listing_title}</p>
                                 <p style="margin: 0;font-size:12px">${item.location_text.text} (${item.distance}mi)</p>
-                            </a>
+                            </div>
                         </div>
                     </div>
                     <img class="item-image image-active image-primary" data-imgnum="0" src=""></img>`;
 
     //document.querySelector(".items").appendChild(div);
 
-    /* creating picture album */
+    /* lazy load images */
+
     let lazyLoad = function () {
         let img = div.querySelector(".image-primary");
         if (!img.classList.contains("loaded")) {
             img.src = item.listing_photos[0].image.uri;
         }
-        div.removeEventListener(lazyLoad);
+        div.removeEventListener("click", lazyLoad);
     }
 
     div.addEventListener("click", lazyLoad);
 
-
+    /* creating picture album */
     if (item.listing_photos.length > 1) {
 
         for (let i = 1; i < item.listing_photos.length; i++) {
@@ -173,14 +174,16 @@ function createListing(item) {
         div.classList.remove("hovered");
     });
 
-    /*
-div.addEventListener("click", () => {
-    batch[item.id] = {
-        ...item,
-        hide: true,
-    }
-    console.log(batch[item.id]);
-});*/
+    div.querySelector(".item-link").addEventListener("click", () => {
+        console.log("CLCKED!");
+        chrome.tabs.create({ url: `https://facebook.com/marketplace/item/${item.id}` });
+    });
+
+    div.querySelector(".hide-item").addEventListener("click", () => {
+        batch[item.id] = { ...item, hide: true };
+        checkBatch();
+        div.remove();
+    });
 
     return div;
 }
@@ -308,6 +311,7 @@ function setupGraph(low, high, avg) {
 */
 
 function display(reset = false) {
+    console.log("display()");
 
     chrome.tabs.query({ url: ["https://www.facebook.com/marketplace/*/search*", "https://www.facebook.com/marketplace/category/*"] }, function (tabs) {
         const save = document.querySelector("#save-under").value;
@@ -333,7 +337,7 @@ function display(reset = false) {
                     "showNegotiable": { "checked": document.querySelector("#showNegotiable").checked },
                     "explicitWords": { "checked": document.querySelector("#explicitWords").checked, "words": document.querySelector("#explicitWordsVal").value },
                     "explicitWordsHide": { "checked": document.querySelector("#explicitWordsHide").checked, "words": document.querySelector("#explicitWordsHideVal").value },
-                    "hideScams": { "checked": document.querySelector("#hideScams").checked },
+                    "hideEmojis": { "checked": document.querySelector("#hideEmojis").checked },
                     "availability": tabs[0].url.includes("availability=out%20of%20stock") ? "sold" : "available",
                     "lat": storage.settings.lat,
                     "long": storage.settings.long,
@@ -366,8 +370,10 @@ function display(reset = false) {
                         let description = (" " + item.marketplace_listing_title + " " + item.redacted_description.text + " ").toLowerCase();
                         let found = false;
                         words.forEach(word => {
-                            if (description.includes(" " + word.toLowerCase().trim() + " ")) {
-                                found = true;
+                            if (word !== "") {
+                                if (description.includes(" " + word.toLowerCase().trim() + " ")) {
+                                    found = true;
+                                }
                             }
                         });
                         allowAfterFilter = found;
@@ -375,15 +381,20 @@ function display(reset = false) {
 
                     if (options.explicitWordsHide.checked === true) {
                         let words = options.explicitWordsHide.words.split(",");
+                        console.log(words);
                         let description = (" " + item.marketplace_listing_title + " " + item.redacted_description.text + " ").toLowerCase();
                         words.forEach(word => {
-                            if (description.includes(" " + word.toLowerCase().trim() + " ")) {
-                                allowAfterFilter = false;
+                            if (word !== "") {
+                                if (description.includes(word.toLowerCase())) {
+                                    allowAfterFilter = false;
+                                }
                             }
                         });
                     }
 
-                    if (options.hideScams.checked === true) {
+                    if (options.hideEmojis.checked === true) {
+                        let description = (" " + item.marketplace_listing_title + " " + item.redacted_description.text + " ");
+                        if ((description.match(/([\uD800-\uDBFF][\uDC00-\uDFFF])/g))) allowAfterFilter = false;
 
                     }
 
@@ -419,10 +430,9 @@ function display(reset = false) {
                         totalAfterFilter++;
                     }
                 });
-                let avg = totalPrice / totalAfterFilter;
-                document.querySelector(".items-count").textContent = totalAfterFilter + " Items";
 
                 /* setting up graph */
+                let avg = totalPrice / totalAfterFilter;
                 document.querySelector("#avg-price").textContent = `Average: $${parseInt(avg)}`;
                 let incr = (avg - low) / (num_graph_sections / 2);
                 if ((incr * (num_graph_sections + 1)) > high) { // if the highest item is less than the increment
@@ -435,39 +445,6 @@ function display(reset = false) {
                     sec.querySelector(".price").textContent = "$" + parseInt(low + (i * incr)) + (i === num_graph_sections ? "+" : "");
                 });
 
-                /*
-                console.log("toSort", toSort);
-                console.log("toSort.sort()", toSort.sort(sortBy(options.sort)));
-    
-    
-                toSort.sort(sortBy(options.sort)).forEach((item, index) => {
-                    console.log(item, index);
-                    let itemEl;
-                    // check if item is already created
-                    if (document.querySelector(`.item-container[data-id="${item.id}"`)) {
-                        itemEl = document.querySelector(`.item-container[data-id="${item.id}"`);
-                    } else {
-                        itemEl = createListing(item);
-                    }
-                    document.querySelector(".items").insertBefore(itemEl, document.querySelectorAll(".item-container")[index]);
-    
-                    if (item.allowAfterFilter === false || item.hide === true) {
-                        itemEl.style.display = "none";
-                    }
-                    if (item.allowAfterFilter) {
-                        itemEl.style.display = "block";
-                        let section = (parseInt(item.listing_price.amount) === 0 || parseInt(item.listing_price.amount) === low) && incr === 0 ? 0 : parseInt((parseInt(item.listing_price.amount) - low) / incr);
-                        console.log((parseInt(item.listing_price.amount) + " - " + low + " / " + incr));
-                        if (section >= 12) section = 12;
-                        console.log(section);
-                        let bar = document.querySelector(`.graph > div[data-incr="${section}"] > .bar`);
-                        bar.style.width = (parseInt(bar.style.width) + 10) + "px";
-                    }
-                });
-                */
-
-                if (reset === true) document.querySelector(".items").textContent = "";
-
 
                 let sections = [];
                 let max_section = 0;
@@ -475,9 +452,18 @@ function display(reset = false) {
                     sections[i] = 0;
                 }
 
+                /* completely remake all items */
+                if (reset === true) document.querySelector(".items").textContent = "";
+
+                /* sort items */
+                console.log(options.sort, options.direction);
                 toSort = toSort.sort(sortBy(options.sort, options.direction));
 
+                /* create item */
+                let existingItems = document.querySelectorAll(".item-container");
+                let refresh = toSort.length > existingItems.length;
                 for (let i = toSort.length - 1; i >= 0; i--) {
+                    console.log(toSort.length, ", ", existingItems.length);
                     const item = toSort[i];
                     let itemEl;
                     /* check if item is already created */
@@ -486,12 +472,26 @@ function display(reset = false) {
                     } else {
                         itemEl = createListing(item);
                     }
-                    document.querySelector(".items").appendChild(itemEl);
-                    if (item.allowAfterFilter === false || item.hide === true) {
-                        itemEl.style.display = "none";
+                    /* if the item isn't in the correct place already, move it */
+
+                    if (refresh === false) {
+                        try {
+                            if (i > existingItems.length - 1 || i === 0 || existingItems[existingItems.length - i].dataset.id !== item.id) {
+                                console.log("appending child", i, item.id);
+                                //document.querySelector(".items").appendChild(itemEl);
+                                refresh = true;
+                            }
+                        } catch (e) {
+                            console.error("ERROR!!!", i, existingItems.length, existingItems.length - i, item, item.id, existingItems[existingItems.length - i]);
+                            console.log(i + " > " + (existingItems.length - 1), i > existingItems.length - 1);
+                            console.log(e);
+                        }
                     }
 
-                    if (item.allowAfterFilter) {
+
+                    if (item.allowAfterFilter === false || item.hide === true) {
+                        itemEl.style.display = "none";
+                    } else {
                         itemEl.style.display = "block";
                         let section = (parseInt(item.listing_price.amount) === 0 || parseInt(item.listing_price.amount) === low) && incr === 0 ? 0 : parseInt((parseInt(item.listing_price.amount) - low) / incr);
                         if (section >= num_graph_sections) section = num_graph_sections;
@@ -499,24 +499,25 @@ function display(reset = false) {
                         if (sections[section] > sections[max_section]) {
                             max_section = section;
                         }
-                        /*
-                        let bar = document.querySelector(`.graph-bars > div[data-incr="${section}"] > .bar`);
-                        console.log("BAR!!! ", bar);
-                        console.log("BAR STYLE WIDTH ! ", bar.style.width);
-                        bar.style.width = (parseInt(bar.style.width) + 10) + "px";*/
+                    }
+
+                    if (refresh) {
+                        document.querySelector(".items").appendChild(itemEl);
                     }
                 }
 
+                /* determine the length of a single bar */
+                /* the section with most items should span 100% of the graph */
                 let bars = document.querySelector(".graph-bars");
                 let percentage = 100 / sections[max_section];
 
+                /* increase each bar section */
                 for (let i = 0; i <= num_graph_sections; i++) {
                     let bar = bars.querySelector(`div[data-incr="${i}"] > .bar`);
                     bar.style.width = (sections[i] * percentage) + "%";
                 }
 
-
-
+                /* displaying indicators if there is no data */
                 if (keys.length > 0) {
                     document.querySelector("#no-items").style.display = "none";
                     document.querySelector("#graph-no-data").style.display = "none";
@@ -527,7 +528,9 @@ function display(reset = false) {
                     document.querySelector("#avg-price").textContent = "Average: n/a";
                     document.querySelector(".graph-bars").style.display = "none";
                 }
+                document.querySelector(".items-count").textContent = totalAfterFilter + " Items";
 
+                console.log("hello????");
                 load();
             });
         })
@@ -544,12 +547,14 @@ function reset() {
     document.querySelector(".items").textContent = "";
 }
 
-let load = function() {
-    let items = document.querySelectorAll(".item-container");
+let load = function () {
+    const items = document.querySelectorAll(".item-container");
     let height = items[0].offsetHeight;
-    let num = Math.ceil((window.innerHeight + window.scrollY) / height);  
-    let max = Math.min(items.length, num * 2);
-    for(let i = 0; i < max; i++) {
+    let width = Math.ceil(document.querySelector(".items-container").offsetWidth / height);
+    let num = Math.ceil((window.innerHeight + window.scrollY) / height);
+    let max = Math.min(items.length, num * width);
+
+    for (let i = 0; i < max; i++) {
         items[i].click();
     }
 }
@@ -585,7 +590,7 @@ function refresh() {
 
 let refreshInterval;
 
-const loadSettings = (callback = () => {}) => {
+const loadSettings = (callback = () => { }) => {
     chrome.tabs.query({ url: ["https://www.facebook.com/marketplace/*/search*", "https://www.facebook.com/marketplace/category/*"] }, function (tabs) {
         chrome.storage.local.get(["settings", "saved"], storage => {
             document.querySelector("#long").value = storage.settings.long;
@@ -593,23 +598,52 @@ const loadSettings = (callback = () => {}) => {
             document.querySelector("#delay").value = storage.settings.delay;
             document.querySelector("#max_items").value = storage.settings.max_items;
 
-            let set = false;
 
             if (!storage.saved || storage.saved.length === 0) {
 
             } else {
+                let set = false;
                 document.querySelector("#save-under").textContent = "";
                 storage.saved.forEach(item => {
-                    document.querySelector("#save-under").innerHTML += '<option value="' + item.name + '">' + item.name + '</option>';
+                    let selected = "";
                     if (set === false) {
                         item.pathnames.forEach(path => {
                             if (tabs[0].url === path) {
+                                console.log(tabs[0].url, path);
                                 document.querySelector("#save-under").value = item.name;
+                                selected = "selected";
                                 set = true;
                             }
                         })
                     }
+                    document.querySelector("#save-under").innerHTML += '<option value="' + item.name + '"' + selected + '>' + item.name + '</option>';
                 });
+
+                const searches = document.querySelector(".searches");
+                searches.textContent = "";
+                storage.saved.forEach(item => {
+                    let container = document.createElement("div");
+                    container.className = "saved-search";
+                    container.innerHTML = `<div class="search-drop-btn"><p class="search-title">${item.name}</p><div>${chevronDown}</div></div><div class="search-queries"></div>`;
+                    item.pathnames.forEach(path => {
+                        let link = document.createElement("p");
+                        link.className = "search-link";
+                        link.textContent = path;
+                        link.addEventListener("click", () => {
+                            console.log(path);
+                            chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                                chrome.tabs.update(tabs[0].id, { url: path });
+                            });
+                        });
+                        container.querySelector(".search-queries").prepend(link);
+                    });
+                    container.querySelector(".search-drop-btn").addEventListener("click", () => {
+                        container.querySelector(".search-queries").classList.toggle("open");
+                    })
+                    searches.appendChild(container);
+                });
+
+
             }
             callback();
         });
@@ -651,7 +685,7 @@ document.addEventListener("DOMContentLoaded", function () {
     document.addEventListener("scroll", load);
 
     // refilter after changing filters
-    ["sort", "beforeYear", "beforeYearVal", "direction", "hideDistance", "hideDistanceVal", "hideTimeOver", "hidetimeOverVal", "hidePriceUnder", "hidePriceUnderVal", "hidePriceOver", "hidePriceOverVal", "showNegotiable", "explicitWords", "explicitWordsVal", "explicitWordsHide", "explicitWordsHideVal"].forEach(filter => {
+    ["sort", "hideEmojis", "beforeYear", "beforeYearVal", "direction", "hideDistance", "hideDistanceVal", "hideTimeOver", "hidetimeOverVal", "hidePriceUnder", "hidePriceUnderVal", "hidePriceOver", "hidePriceOverVal", "showNegotiable", "explicitWords", "explicitWordsVal", "explicitWordsHide", "explicitWordsHideVal"].forEach(filter => {
         document.querySelector("#" + filter).addEventListener("change", () => {
             console.log('document.querySelector("#" +' + filter + ')');
             //checkBatch(true);
@@ -802,6 +836,7 @@ function sendMessage(message) {
 }
 
 function sortBy(sort, direction) {
+    console.log(sort, direction);
     switch (sort) {
         case "time":
             return (a, b) => {
@@ -815,14 +850,15 @@ function sortBy(sort, direction) {
                 return direction === "asc" ? (x > y ? -1 : 1) : (x < y ? -1 : 1);
             }
         case "distance":
-            chrome.storage.local.get("settings", storage => {
-                return (a, b) => {
-                    let xlat = parseFloat(a.location.latitude), xlong = parseFloat(a.location.longitude), ylat = parseFloat(b.location.latitude), ylong = parseFloat(b.location.longitude);
-                    let pythx = Math.sqrt(Math.pow(storage.settings.lat - xlat, 2) + Math.pow(storage.settings.long - xlong, 2));
-                    let pythy = Math.sqrt(Math.pow(storage.settings.lat - ylat, 2) + Math.pow(storage.settings.long - ylong, 2));
-                    return pythx < pythy ? -1 : 1;
-                }
-            })
+            const lat = document.querySelector("#lat").value;
+            const long = document.querySelector("#long").value;
+            return (a, b) => {
+                let xlat = parseFloat(a.location.latitude), xlong = parseFloat(a.location.longitude), ylat = parseFloat(b.location.latitude), ylong = parseFloat(b.location.longitude);
+                let pythx = Math.pow(lat - xlat, 2) + Math.pow(long - xlong, 2);
+                let pythy = Math.pow(lat - ylat, 2) + Math.pow(long - ylong, 2);
+                console.log(pythx + " < " + pythy);
+                return pythx > pythy ? -1 : 1;
+            }
     }
 }
 

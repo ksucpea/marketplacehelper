@@ -124,7 +124,10 @@ img {
     padding-bottom: 100%;
     opacity: 0%;
     transition: .5s opacity;
+    background: #adadad;
 }
+
+.item-link:hover {cursor: pointer;}
 
 .item-image {
     display: none;
@@ -159,6 +162,16 @@ img {
     font-weight: bold;
     font-size: 20px;
 }
+
+.saved-search { background:#f0f2f5;border-radius:6px;width:100%}
+.search-queries {display: none;padding:0 12px}
+.search-queries.open {display: block}
+.search-drop-btn {display: flex;align-items: center;justify-content: space-between;font-size:14px;font-weight:600;padding:12px}
+.search-title {margin: 0;}
+.search-drop-btn:hover {cursor: pointer}
+.search-link {margin: 0; margin-bottom: 10px}
+.search-link {cursor: pointer;}
+
 
 .settings input.text-input {width: 120px}
 
