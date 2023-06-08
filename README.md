@@ -14,7 +14,7 @@ Note: this is a WIP and has several things that need to be fixed
 <h2>Usage</h2>
 
 <p>Open devtools window in Facebook Marketplace (right click -> inspect element -> Marketplace Helper tab)</p>
-<p>Collect listing data by going to a category or searching for an item and pressing the start button</p>
+<p>Collect listing data by going to a category or searching for an item and pressing the start button. Scroll down the marketplace page to load more items and put them in the queue.</p>
 <img src="https://github.com/ksucpea/marketplacehelper/blob/main/images/img3.png" height="560px" />
 
 
