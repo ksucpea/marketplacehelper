@@ -23,4 +23,4 @@ Note: this is a WIP and has several things that need to be fixed
 <img src="https://github.com/ksucpea/marketplacehelper/blob/main/images/img5.png" />
 
 <p>Hover over items and press the arrow buttons to view more listing images</p>
-<img src="https://github.com/ksucpea/marketplacehelper/blob/main/images/4.png" />
+<img src="https://github.com/ksucpea/marketplacehelper/blob/main/images/img7.png" />
