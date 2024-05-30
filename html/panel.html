@@ -19,13 +19,6 @@
         <div class="header">
             <h1 class="title">Marketplace Helper</h1>
             <p id="current-query" class="text-tiny"></p>
-            <div class="settings">
-                <h2>Settings</h2>
-                <div class="filter-container"><input class="text-input" type="text" id="lat"></input><span>latitude</span></div>
-                <div class="filter-container"><input class="text-input" type="text" id="long"></input><span>longitude</span></div>
-                <div class="filter-container"><input class="text-input" type="text" id="delay"></input><span>item delay</span></div>
-                <div class="filter-container"><input class="text-input" type="text" id="max_items"></input><span>max items</span></div>
-            </div>
             <div class="controls">
                 <h2>Controls</h2>
                 <div>
@@ -43,6 +36,14 @@
                     <input class="text-input" type="text" id="create-save-name"></input>
                     <button id="create-save">Go</button>
                 </div>
+            </div>
+            <div class="settings">
+                <h2>Settings</h2>
+                <div class="filter-container"><input class="text-input" type="text" id="lat"></input><span>latitude</span></div>
+                <div class="filter-container"><input class="text-input" type="text" id="long"></input><span>longitude</span></div>
+                <div class="filter-container"><input class="text-input" type="text" id="delay"></input><span>queue process time (ms)</span></div>
+                <p style="margin-top:3px;margin-bottom:10px">Warning: lowering this may result in getting temporarily blocked</p>
+                <div class="filter-container"><input class="text-input" type="text" id="max_items"></input><span>max items shown</span></div>
             </div>
             <div class="filters">
                 <h2>Filters</h2>
@@ -184,7 +185,9 @@
                 </div>
             </div>
             <p id="no-items">No data for this yet.</p>
-            <div class="items"></div>
+            <div class="items-scroll">
+                <div class="items"></div>
+            </div>
         </div>
     </div>
     <script src="../js/panel.js"></script>

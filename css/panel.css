@@ -105,8 +105,7 @@ img {
 .items {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 12px;
-    padding: 16px;
+    gap: 10px;
 }
 
 .items-container {
@@ -122,7 +121,7 @@ img {
     position: relative;
     height: 0;
     padding-bottom: 100%;
-    opacity: 0%;
+    opacity: 100%;
     transition: .5s opacity;
     background: #adadad;
 }
@@ -317,4 +316,20 @@ button.active:hover {
 
 .item-arrow-right svg {
     transform: rotate(-90deg);
+}
+/*
+.item {
+    position: absolute;
+    width:100%;
+}
+*/
+
+.items-scroll {
+    position:relative;
+    margin: 16px;
+}
+
+.items {
+    position: absolute;
+    width: 100%;
 }

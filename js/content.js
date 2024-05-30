@@ -32,12 +32,11 @@ function setNextOverlayItem(items = null) {
     let listings = el2.querySelectorAll('a');
     el.textContent = "";
     if (items === null) {
-        el.textContent = "Searching for new items...";
+        el.textContent = "Scroll to continue searching for new items";
     } else {
         let str = "";
         //const max = (items.length > 3 ? 3 : items.length);
         const max = items.length;
-        console.log("MAX !!! = " + max);
         el.innerHTML += "<p>" + items.length + " in queue</p>";
         for (let i = 0; i < max; i++) {
             const listing = items[i];
@@ -64,10 +63,10 @@ function getListings2() {
         chrome.storage.local.get(pathnames, storage => {
             let existing = {};
             pathnames.forEach(pathname => {
-                console.log(storage[pathname]);
+                //console.log(storage[pathname]);
                 existing = { ...data, ...storage[pathname] };
             });
-            console.log(existing);
+            //console.log(existing);
             let el = document.querySelector('div[aria-label="Collection of Marketplace items"]');
             let visited = el.querySelectorAll('a.bfbm-visited');
             let listings = el.querySelectorAll('a');
