@@ -584,31 +584,75 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // send start message to content script
-    document.querySelector("#start").addEventListener("click", function (e) {
-        //clearInterval(refreshInterval);
-        //refresh();
-        //refreshInterval = setInterval(refresh, 10000);
+    //send start message to content script
+    // document.querySelector("#start").addEventListener("click", function (e) {
+    //     //clearInterval(refreshInterval);
+    //     //refresh();
+    //     //refreshInterval = setInterval(refresh, 10000);
 
-        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-            const save = document.querySelector("#save-under").value;
-            chrome.storage.local.get("saved", storage => {
-                for (let i = 0; i < storage["saved"].length; i++) {
-                    if (storage["saved"][i].name === save) {
-                        if (!storage["saved"][i].pathnames.includes(tabs[0].url)) {
-                            storage["saved"][i].pathnames.push(tabs[0].url);
-                            chrome.storage.local.set({ "saved": storage["saved"] });
-                        }
-                        break;
-                    }
-                }
-                sendMessage({ "type": "start", "name": save });
-                e.target.classList.add("active");
-                document.querySelector("#pause").classList.remove("active");
-            });
-        });
+    //     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    //         const save = document.querySelector("#save-under").value;
+    //         chrome.storage.local.get("saved", storage => {
+    //             for (let i = 0; i < storage["saved"].length; i++) {
+    //                 if (storage["saved"][i].name === save) {
+    //                     if (!storage["saved"][i].pathnames.includes(tabs[0].url)) {
+    //                         storage["saved"][i].pathnames.push(tabs[0].url);
+    //                         chrome.storage.local.set({ "saved": storage["saved"] });
+    //                     }
+    //                     break;
+    //                 }
+    //             }
+    //             sendMessage({ "type": "start", "name": save });
+    //             e.target.classList.add("active");
+    //             document.querySelector("#pause").classList.remove("active");
+    //         });
+    //     });
 
-    });
+    // });    
+     document.querySelector("#start").addEventListener("click", function (e) {
+         chrome.tabs.query({ currentWindow: true, lastFocusedWindow: true }, function (tabs) {
+             if (!tabs || tabs.length === 0) {
+                console.error("No active tab found");
+
+                 return;
+             }
+            
+             const activeTab = tabs[0];
+             if (!activeTab.url) {
+                 console.error("The active tab has no URL");
+                 return;
+             }
+    
+             const save = document.querySelector("#save-under").value;
+             chrome.storage.local.get("saved", storage => {
+                 if (!storage.saved || !Array.isArray(storage.saved)) {
+                     console.error("No saved storage found or it's not an array");
+                     return;
+                 }
+    
+                 for (let i = 0; i < storage.saved.length; i++) {
+                     if (storage.saved[i].name === save) {
+                         if (!storage.saved[i].pathnames.includes(activeTab.url)) {
+                             storage.saved[i].pathnames.push(activeTab.url);
+                             chrome.storage.local.set({ "saved": storage.saved });
+                         }
+                         break;
+                     }
+                 }
+                 sendMessage({ "type": "start", "name": save });
+                 e.target.classList.add("active");
+                 document.querySelector("#pause").classList.remove("active");
+             });
+         });
+     });
+
+    
+    
+
+
+
+
+
 
     // send pause message to content script
     document.querySelector("#pause").addEventListener("click", pause);
