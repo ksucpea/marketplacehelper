@@ -1,5 +1,7 @@
 let batchTimer;
 let batch = {};
+let requests = [];
+
 const batchCount = 10;
 const num_graph_sections = 13; // +1 (starts at 0)
 
@@ -28,52 +30,52 @@ function selectItemAvailability() {
 function checkBatch() {
     chrome.tabs.query({ url: ["https://www.facebook.com/marketplace/*"] }, function (tabs) {
         const path = tabs[0].url;
-        chrome.storage.local.get([path], storage => {
-            //selectItemAvailability();
+        chrome.storage.local.get([path], async storage => {
+            if (requests.length === 0) return;
             const availability = tabs[0].url.includes("availability=out%20of%20stock") ? "sold" : "available";
-            const keys = Object.keys(batch);
-            keys.forEach(key => {
-                batch[key].availability = availability;
+            processNewItems(availability).then(items => {
+                let existing = storage[path] ? storage[path] : {};
+                let updatedData = { ...existing, ...items };
+
+                chrome.storage.local.set({ [path]: updatedData }).then(() => {
+                    document.querySelector(".batch-count").textContent = "refreshing";
+                    setTimeout(() => {
+                        document.querySelector(".batch-count").textContent = "";
+                    }, 2000);
+                    filterItems();
+                });
             });
-
-            let existing = storage[path] ? storage[path] : {};
-            let updatedData = { ...existing, ...batch };
-            if (keys.length === 0) return;
-
-            batch = {};
-            chrome.storage.local.set({ [path]: updatedData }).then(() => {
-                document.querySelector(".batch-count").textContent = "dumped";
-
-                filterItems();
-            });
-
         });
     });
 }
 
-async function detectNewItem(request) {
-    request.getContent((body) => {
-        if (request.request && request.request.url && request.request.url.includes('https://www.facebook.com/api/graphql/')) {
-            try {
-                let req = body.split('{"data":')[1].split(',"extensions":{')[0];
-                let data = JSON.parse(req);
-                if (data?.viewer?.marketplace_product_details_page?.target) {
-                    let x = data.viewer.marketplace_product_details_page.target;
-                    x.availability = "available";
-                    x.hide = false;
-                    x.negotiable = x.can_buyer_make_checkout_offer ? true : isItemNegotiable(x.marketplace_listing_title + " " + x.redacted_description.text);
-                    if (!batch[x.id]) {
-                        batch[x.id] = { ...x, "updated": true };
-                    } else {
-                        batch[x.id] = { ...batch[x.id], ...x };
+function processNewItems(availability) {
+    return new Promise((resolve, reject) => {
+        let b = {};
+        for (let i = 0; i < requests.length; i++) {
+            requests[i].getContent(body => {
+                try {
+                    let parsed = JSON.parse(body);
+                    let item = parsed?.data?.viewer?.marketplace_product_details_page?.target;
+                    if (!item) return;
+
+                    item.availability = availability;
+                    item.hide = false;
+                    if (item["can_buyer_make_checkout_offer"] !== undefined) {
+                        item.negotiable = item.can_buyer_make_checkout_offer ? true : isItemNegotiable(item.marketplace_listing_title + " " + item.redacted_description.text);
                     }
-                    document.querySelector(".batch-count").textContent = Object.keys(batch).length + " waiting";
+
+                    if (!b[item.id]) {
+                        b[item.id] = { ...item, "updated": true };
+                    } else {
+                        b[item.id] = { ...b[item.id], ...item };
+                    }
+                } catch {
+                    console.log("error parsing body");
+                } finally {
+                    if (i === requests.length - 1) resolve(b);
                 }
-            } catch (e) {
-                let x = document.createElement("p");
-                x.textContent = e;
-                document.body.appendChild(x);
-            }
+            });
         }
     });
 }
@@ -333,6 +335,7 @@ function filterItems() {
 
                 filtered = filtered.sort(sortBy(options.sort, options.direction));
 
+                console.log(filtered);
 
                 for (const item of filtered) {
                     let section = (parseInt(item.listing_price.amount) === 0 || parseInt(item.listing_price.amount) === low) && incr === 0 ? 0 : parseInt((parseInt(item.listing_price.amount) - low) / incr);
@@ -417,7 +420,7 @@ function display() {
         const start = Math.min(Math.floor((scrollTop / ih)) * numCols);
         if (start === prev || scrollTop >= maxScroll) return;
 
-        document.querySelector(".items").style.top =  y + "px";
+        document.querySelector(".items").style.top = y + "px";
 
         for (var j = 0; j < numItems + numCols; j++) {
             if (j + start > currentItems.length - 1) return;
@@ -425,7 +428,7 @@ function display() {
             items[j].innerHTML = "";
             items[j].appendChild(item);
         }
-        
+
         prev = start;
 
     }
@@ -546,7 +549,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     //checkBatch()
     batchTimer = setInterval(checkBatch, 5000);
-    chrome.devtools.network.onRequestFinished.addListener(detectNewItem);
+
+    chrome.devtools.network.onRequestFinished.addListener((request) => {
+        if (request.request && request.request.url && request.request.url.includes('https://www.facebook.com/api/graphql/')) {
+            requests.push(request);
+        }
+    });
+
+    //chrome.devtools.network.onRequestFinished.addListener(detectNewItem);
 
     selectItemAvailability();
 
@@ -568,7 +578,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (request.type === "numListings") {
         } else if (request.type === "existingItem") {
             request.data.seen = true;
-            detectNewItem(request);
+           // detectNewItem(request);
         }
     });
 
