@@ -33,8 +33,13 @@
                 </div>
                 <div class="filter-container">
                     <span>Create new saved search: </span>
-                    <input class="text-input" type="text" id="create-save-name"></input>
+                    <input class="text-input" type="text" id="create-save-name" placeholder="name"></input>
                     <button id="create-save">Go</button>
+                </div>
+                <div class="filter-container">
+                    <span>Clear saved search: </span>
+                    <input class="text-input" type="text" id="clear-save-name" placeholder="name"></input>
+                    <button id="clear-save">Go</button>
                 </div>
             </div>
             <div class="settings">
@@ -85,18 +90,18 @@
                 </div>
                 <div class="filter-container">
                     <input type="checkbox" id="beforeYear" name="beforeYear" class="filter-checkbox">
-                    <label for="beforeYear">User's account must be made before the year:</label>
-                    <input type="text" id="beforeYearVal" class="text-input"></input>
+                    <label for="beforeYear">Account must be made before the year:</label>
+                    <input type="number" id="beforeYearVal" class="text-input" value="2024"></input>
                 </div>
                 <div class="filter-container">
                     <input type="checkbox" id="explicitWords" name="explicitWords" class="filter-checkbox">
-                    <label for="explicitWords">Item must have these words in the title or description</label>
-                    <input type="text" id="explicitWordsVal" class="text-input input-long"></input>
+                    <label for="explicitWords">Item must contain words:</label>
+                    <input type="text" id="explicitWordsVal" class="text-input input-long" placeholder="apples, oranges"></input>
                 </div>
                 <div class="filter-container">
                     <input type="checkbox" id="explicitWordsHide" name="explicitWordsHide" class="filter-checkbox">
-                    <label for="explicitWordsHide">Hide items that have these words in the title or description</label>
-                    <input type="text" id="explicitWordsHideVal" class="text-input input-long"></input>
+                    <label for="explicitWordsHide">Hide items that contain words:</label>
+                    <input type="text" id="explicitWordsHideVal" class="text-input input-long" placeholder="grapes, pears"></input>
                 </div>
                 <div class="filter-container">
                     <input type="checkbox" id="hideEmojis" name="hideEmojis" class="filter-checkbox">
